@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/models"
+	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/requests"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/services"
 )
 
@@ -51,7 +52,24 @@ func ShowUser(c *gin.Context) {
 
 func StoreUser(c *gin.Context) {
 	var user models.User
-	c.BindJSON(&user)
+	var request requests.StoreUserRequest
+	c.BindJSON(&request)
+
+	if errs := request.Validate(); len(errs) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "validation error",
+			"errors":  errs,
+		})
+		return
+	}
+
+	user = models.User{
+		Name:     request.Name,
+		Email:    request.Email,
+		Password: request.Password,
+		Avatar:  request.Avatar,
+		RoleId:  request.RoleId,
+	}
 
 	if err := services.CreateUser(c, &user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -73,6 +91,14 @@ func UpdateUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
+		})
+		return
+	}
+
+	if errs := user.Validate(); len(errs) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "validation error",
+			"errors":  errs,
 		})
 		return
 	}

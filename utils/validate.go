@@ -1,6 +1,9 @@
 package utils
 
-import "net/url"
+import (
+	"net/mail"
+	"net/url"
+)
 
 func IsValidUrl(v string) bool {
 	_, err := url.ParseRequestURI(v)
@@ -14,4 +17,10 @@ func IsValidUrl(v string) bool {
 	}
 
 	return true
+}
+
+func IsValidEmail(v string) bool {
+	_, err := mail.ParseAddress(v)
+	
+    return err == nil
 }

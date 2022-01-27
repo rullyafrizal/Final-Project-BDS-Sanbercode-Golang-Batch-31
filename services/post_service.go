@@ -12,14 +12,40 @@ import (
 
 func GetPosts(c *gin.Context, posts *[]models.Post) error {
 	db := c.MustGet("db").(*gorm.DB)
-	err := db.Preload("PostImages").Preload("Tags").Preload("Reviews").Find(&posts).Error
+	err := db.Preload("PostImages").Preload("Tags").Where("is_published = ?", true).Find(&posts).Error
+
+	return err
+}
+
+func GetMyPosts(c *gin.Context, posts *[]models.Post) error {
+	db := c.MustGet("db").(*gorm.DB)
+	userId, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.Preload("PostImages").Preload("Tags").Where("user_id = ?", userId).Find(&posts).Error
+
+	return err
+}
+
+func GetMyPost(c *gin.Context, post *models.Post, id int64) error {
+	db := c.MustGet("db").(*gorm.DB)
+	userId, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.Preload("PostImages").Preload("Tags").Preload("Reviews").Preload("Reviews.User").Where("user_id = ?", userId).First(&post, id).Error
 
 	return err
 }
 
 func GetPost(c *gin.Context, post *models.Post, id int64) error {
 	db := c.MustGet("db").(*gorm.DB)
-	err := db.First(&post, id).Error
+	err := db.Preload("PostImages").Preload("Tags").Preload("Reviews").Preload("Reviews.User").Where("is_published = ?", true).First(&post, id).Error
 
 	return err
 }
@@ -47,12 +73,18 @@ func CreatePost(c *gin.Context, post *requests.StorePostRequest) []error {
 			postImages = append(postImages, pi)
 		}
 
+		userId, err := utils.ExtractTokenID(c)
+
+		if err != nil {
+			return err
+		}
+
 		var post models.Post = models.Post{
 			Title:      post.Title,
 			Content:    post.Content,
 			Tags:       tags,
 			PostImages: postImages,
-			UserId:     4, // TODO: ubah ini nanti, masih hardcode sementara
+			UserId:     userId,
 		}
 
 		var errMsgs map[string]string = post.ValidatePost()
@@ -65,7 +97,7 @@ func CreatePost(c *gin.Context, post *requests.StorePostRequest) []error {
 			return nil
 		}
 
-		err := tx.Save(&post).Error
+		err = tx.Save(&post).Error
 
 		if err != nil {
 			errs = append(errs, err)
@@ -87,6 +119,11 @@ func UpdatePost(c *gin.Context, req *requests.StorePostRequest, id int64) []erro
 		var postImages []models.PostImage
 
 		if err := GetPost(c, &post, id); err != nil {
+			return err
+		}
+
+		if err := isUserPost(c, &post); err != nil {
+			errs = append(errs, err)
 			return err
 		}
 
@@ -136,6 +173,10 @@ func DeletePost(c *gin.Context, id int64) error {
 			return err
 		}
 
+		if err := isUserPost(c, &post); err != nil {
+			return err
+		}
+
 		tx.Model(&post).Association("Tags").Clear()
 		tx.Model(&post).Association("PostImages").Clear()
 
@@ -154,6 +195,10 @@ func PublishPost(c *gin.Context, id int64) error {
 		return err
 	}
 
+	if err := isUserPost(c, &post); err != nil {
+		return err
+	}
+
 	post.IsPublished = true
 
 	db := c.MustGet("db").(*gorm.DB)
@@ -161,4 +206,18 @@ func PublishPost(c *gin.Context, id int64) error {
 	err := db.Save(&post).Error
 
 	return err
+}
+
+func isUserPost(c *gin.Context, post *models.Post) error {
+	userId, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		return err
+	}
+
+	if post.UserId != userId {
+		return errors.New("you are not authorized to update this post")
+	}
+
+	return nil
 }

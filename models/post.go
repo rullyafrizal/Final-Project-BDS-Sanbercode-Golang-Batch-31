@@ -12,9 +12,9 @@ type Post struct {
 	Content     string      `json:"content"`
 	IsPublished bool        `json:"is_published" gorm:"default:false"`
 	UserId      int64       `json:"user_id"`
-	PostImages  []PostImage `json:"post_images"`
-	Tags        []Tag       `json:"tags" gorm:"many2many:post_tags;"`
-	Reviews     []Review    `json:"reviews"`
+	PostImages  []PostImage `json:"post_images,omitempty"`
+	Tags        []Tag       `json:"tags,omitempty" gorm:"many2many:post_tags;"`
+	Reviews     []Review    `json:"reviews,omitempty"`
 	CreatedAt   time.Time   `json:"-" gorm:"default:CURRENT_TIMESTAMP;autoCreateTime"`
 	UpdatedAt   time.Time   `json:"-" gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime"`
 }

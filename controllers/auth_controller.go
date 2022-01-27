@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/models"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/requests"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/services"
 )
@@ -29,10 +28,18 @@ func Login(c *gin.Context) {
 }
 
 func Register(c *gin.Context) {
-	var user models.User
-	c.BindJSON(&user)
+	var request requests.RegisterRequest
+	c.BindJSON(&request)
 
-	err := services.CreateUser(c, &user)
+	if errs := request.Validate(); len(errs) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "validation error",
+			"data":    errs,
+		})
+		return
+	}
+
+	err := services.Register(c, request)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -43,5 +50,21 @@ func Register(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "OK",
+	})
+}
+
+func Me(c *gin.Context) {
+	user, err := services.Me(c)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "OK",
+		"data":    user,
 	})
 }

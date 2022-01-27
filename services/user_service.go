@@ -1,8 +1,11 @@
 package services
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/models"
+	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/utils"
 	"gorm.io/gorm"
 )
 
@@ -21,13 +24,11 @@ func GetUser(c *gin.Context, user *models.User, id int64) error {
 }
 
 func CreateUser(c *gin.Context, user *models.User) error {
-	var role models.Role
-
 	db := c.MustGet("db").(*gorm.DB)
 
-	db.Where("name = ?", "user").First(&role)
-
-	user.RoleId = role.ID
+	if err := db.Where("email = ?", user.Email).First(&user).Error; err == nil {
+		return errors.New("email already exists")
+	}
 
 	err := db.Create(&user).Error
 
@@ -36,13 +37,38 @@ func CreateUser(c *gin.Context, user *models.User) error {
 
 func UpdateUser(c *gin.Context, user *models.User, id int64) error {
 	db := c.MustGet("db").(*gorm.DB)
-	err := db.Model(&user).Where("id = ?", id).Updates(user).Error
+
+	authId, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		return err
+	}
+
+	if authId != id {
+		return errors.New("you are not authorized to update this user")
+	}
+
+	if err := db.Where("email = ?", user.Email).Where("id != ", user.Id).First(&user).Error; err == nil {
+		return errors.New("email already exists")
+	}
+
+	err = db.Model(&user).Where("id = ?", id).Updates(user).Error
 
 	return err
 }
 
 func DeleteUser(c *gin.Context, id int64) error {
 	var user models.User
+
+	authId, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		return err
+	}
+
+	if authId != id {
+		return errors.New("you are not authorized to update this user")
+	}
 
 	if err := GetUser(c, &user, id); err != nil {
 		return err

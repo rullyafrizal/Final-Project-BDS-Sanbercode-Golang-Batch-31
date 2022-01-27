@@ -115,6 +115,46 @@ func DestroyPost(c *gin.Context) {
 	})
 }
 
+func IndexMyPosts(c *gin.Context) {
+	var posts []models.Post
+
+	if err := services.GetMyPosts(c, &posts); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "OK",
+		"data":    gin.H{"posts": posts},
+	})
+}
+
+func ShowMyPost(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	var post models.Post
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := services.GetMyPost(c, &post, int64(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "OK",
+		"data":    gin.H{"post": post},
+	})
+}
+
 func PublishPost(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
