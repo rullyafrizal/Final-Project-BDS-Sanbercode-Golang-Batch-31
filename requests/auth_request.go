@@ -51,3 +51,26 @@ func (r *RegisterRequest) Validate() map[string]string {
 
 	return errMsgs
 }
+
+type UpdatePasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
+}
+
+func (u *UpdatePasswordRequest) Validate() map[string]string {
+	var errMsgs map[string]string = map[string]string{}
+
+	if strings.TrimSpace(u.OldPassword) == "" {
+		errMsgs["old_password"] = "old password is required"
+	}
+
+	if strings.TrimSpace(u.NewPassword) == "" {
+		errMsgs["new_password"] = "new password is required"
+	}
+
+	if len(u.NewPassword) < 6 {
+		errMsgs["new_password"] = "new password must be at least 6 characters"
+	}
+
+	return errMsgs
+}

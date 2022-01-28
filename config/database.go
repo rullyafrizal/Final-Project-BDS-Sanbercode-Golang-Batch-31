@@ -42,6 +42,8 @@ func ConnectPostgres() *gorm.DB {
 		panic(err)
 	}
 
+	db.SetupJoinTable(&models.Post{}, "Votes", &models.Vote{})
+
 	db.AutoMigrate(
 		&models.Tag{},
 		&models.Role{},

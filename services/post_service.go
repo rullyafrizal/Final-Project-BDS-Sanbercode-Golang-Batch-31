@@ -1,7 +1,9 @@
 package services
 
 import (
+	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/models"
@@ -12,40 +14,76 @@ import (
 
 func GetPosts(c *gin.Context, posts *[]models.Post) error {
 	db := c.MustGet("db").(*gorm.DB)
-	err := db.Preload("PostImages").Preload("Tags").Where("is_published = ?", true).Find(&posts).Error
+	q := db.Preload("PostImages").Preload("Tags").Where("published_at IS NOT NULL")
+
+	if c.Query("search") != "" {
+		q = q.Where("title LIKE ?", "%"+c.Query("search")+"%").Where("content LIKE ?", "%"+c.Query("search")+"%")
+	}
+
+	err := q.Find(&posts).Error
+
+	for _, post := range *posts {
+		var count int64
+		db.Raw("SELECT SUM(state) FROM votes WHERE post_id = ?", post.ID).Scan(&count)
+
+		post.VoteCount = count
+	}
 
 	return err
 }
 
 func GetMyPosts(c *gin.Context, posts *[]models.Post) error {
 	db := c.MustGet("db").(*gorm.DB)
-	userId, err := utils.ExtractTokenID(c)
+	authId, err := utils.ExtractTokenID(c)
 
 	if err != nil {
 		return err
 	}
 
-	err = db.Preload("PostImages").Preload("Tags").Where("user_id = ?", userId).Find(&posts).Error
+	q := db.Preload("PostImages").Preload("Tags").Where("user_id = ?", authId)
+
+	if c.Query("search") != "" {
+		q = q.Where("title LIKE ?", "%"+c.Query("search")+"%").Where("content LIKE ?", "%"+c.Query("search")+"%")
+	}
+
+	err = q.Find(&posts).Error
+
+	for _, post := range *posts {
+		var count int64
+		db.Raw("SELECT SUM(state) FROM votes WHERE post_id = ?", post.ID).Scan(&count)
+
+		post.VoteCount = count
+	}
 
 	return err
 }
 
 func GetMyPost(c *gin.Context, post *models.Post, id int64) error {
 	db := c.MustGet("db").(*gorm.DB)
-	userId, err := utils.ExtractTokenID(c)
+	authId, err := utils.ExtractTokenID(c)
 
 	if err != nil {
 		return err
 	}
 
-	err = db.Preload("PostImages").Preload("Tags").Preload("Reviews").Preload("Reviews.User").Where("user_id = ?", userId).First(&post, id).Error
+	err = db.Preload("PostImages").Preload("Tags").Preload("Reviews").Preload("Reviews.User").Where("user_id = ?", authId).First(&post, id).Error
+
+	var count int64
+	db.Raw("SELECT SUM(state) FROM votes WHERE post_id = ?", id).Scan(&count)
+
+	post.VoteCount = count
 
 	return err
 }
 
 func GetPost(c *gin.Context, post *models.Post, id int64) error {
 	db := c.MustGet("db").(*gorm.DB)
-	err := db.Preload("PostImages").Preload("Tags").Preload("Reviews").Preload("Reviews.User").Where("is_published = ?", true).First(&post, id).Error
+	err := db.Preload("PostImages").Preload("Tags").Preload("Reviews").Preload("Reviews.User").Where("published_at IS NOT NULL").First(&post, id).Error
+
+	var count int64
+	db.Raw("SELECT SUM(state) FROM votes WHERE post_id = ?", id).Scan(&count)
+
+	post.VoteCount = count
 
 	return err
 }
@@ -118,12 +156,7 @@ func UpdatePost(c *gin.Context, req *requests.StorePostRequest, id int64) []erro
 		var tags []models.Tag
 		var postImages []models.PostImage
 
-		if err := GetPost(c, &post, id); err != nil {
-			return err
-		}
-
-		if err := isUserPost(c, &post); err != nil {
-			errs = append(errs, err)
+		if err := GetMyPost(c, &post, id); err != nil {
 			return err
 		}
 
@@ -169,11 +202,7 @@ func DeletePost(c *gin.Context, id int64) error {
 	db.Transaction(func(tx *gorm.DB) error {
 		var post models.Post
 
-		if err := GetPost(c, &post, id); err != nil {
-			return err
-		}
-
-		if err := isUserPost(c, &post); err != nil {
+		if err := GetMyPost(c, &post, id); err != nil {
 			return err
 		}
 
@@ -191,33 +220,18 @@ func DeletePost(c *gin.Context, id int64) error {
 func PublishPost(c *gin.Context, id int64) error {
 	var post models.Post
 
-	if err := GetPost(c, &post, id); err != nil {
+	if err := GetMyPost(c, &post, id); err != nil {
 		return err
 	}
 
-	if err := isUserPost(c, &post); err != nil {
-		return err
+	post.PublishedAt = sql.NullTime{
+		Time:  time.Now(),
+		Valid: true,
 	}
-
-	post.IsPublished = true
 
 	db := c.MustGet("db").(*gorm.DB)
 
 	err := db.Save(&post).Error
 
 	return err
-}
-
-func isUserPost(c *gin.Context, post *models.Post) error {
-	userId, err := utils.ExtractTokenID(c)
-
-	if err != nil {
-		return err
-	}
-
-	if post.UserId != userId {
-		return errors.New("you are not authorized to update this post")
-	}
-
-	return nil
 }

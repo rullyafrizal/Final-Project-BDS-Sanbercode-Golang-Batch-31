@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/blog-api-docker
+    depends_on:
+      - database
+    container_name: blog-api-web
+    tty: true
+
+  database:
+    build:
+      context: .
+      dockerfile: ./db.Dockerfile
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    tty: true
+    container_name: blog-api-db
+    restart: always
+    ports:
+      - 55433:5432
+    expose:
+      - 5432
+    volumes:
+      - blog-api-vol:/var/lib/postgresql/data
+      - ./docker/psql/sql:/docker-entrypoint-initdb.d/
+
+volumes:
+  blog-api-vol:
+    driver: local

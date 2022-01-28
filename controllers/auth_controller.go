@@ -68,3 +68,29 @@ func Me(c *gin.Context) {
 		"data":    user,
 	})
 }
+
+func UpdatePassword(c *gin.Context) {
+	var request requests.UpdatePasswordRequest
+	c.BindJSON(&request)
+
+	if errs := request.Validate(); len(errs) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "validation error",
+			"data":    errs,
+		})
+		return
+	}
+
+	err := services.UpdatePassword(c, request)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "OK",
+	})
+}

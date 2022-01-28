@@ -39,11 +39,37 @@ func Register(c *gin.Context, request requests.RegisterRequest) error {
 
 	db.Where("name = ?", "user").First(&role)
 
+	user.Name = request.Name
 	user.Email = request.Email
 	user.Password = request.Password
 	user.RoleId = role.ID
 
 	err := db.Create(&user).Error
+
+	return err
+}
+
+func UpdatePassword(c *gin.Context, request requests.UpdatePasswordRequest) error {
+	var user models.User
+
+	userId, err := utils.ExtractTokenID(c)
+
+	if err != nil {
+		return err
+	}
+
+	db := c.MustGet("db").(*gorm.DB)
+	if err := db.First(&user, userId).Error; err != nil {
+		return err
+	}
+
+	if !user.CheckPasswordHash(request.OldPassword) {
+		return errors.New("invalid password")
+	}
+
+	user.Password = request.NewPassword
+
+	err = db.Save(&user).Error
 
 	return err
 }

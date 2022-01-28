@@ -21,7 +21,6 @@ func CreateReview(c *gin.Context, postId int64, request requests.ReviewRequest) 
 	review := models.Review{
 		UserId:  authId,
 		PostId:  postId,
-		Rating:  request.Rating,
 		Comment: request.Comment,
 	}
 
@@ -48,7 +47,6 @@ func UpdateReview(c *gin.Context, id int64, request requests.ReviewRequest) erro
 	}
 
 	review.Comment = request.Comment
-	review.Rating = request.Rating
 
 	if err := db.Save(&review).Error; err != nil {
 		return err

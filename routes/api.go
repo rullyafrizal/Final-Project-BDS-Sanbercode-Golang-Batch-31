@@ -24,6 +24,7 @@ func SetupRouter(db *gorm.DB) {
 		{
 			middlewaredAuthRoute.Use(middlewares.JwtAuthMiddleware())
 			middlewaredAuthRoute.GET("/me", controllers.Me)
+			middlewaredAuthRoute.PUT("/update-password", controllers.UpdatePassword)
 		}
 
 		// Roles
@@ -67,6 +68,10 @@ func SetupRouter(db *gorm.DB) {
 			middlewaredPostsRoute.PUT("/:id", controllers.UpdatePost)
 			middlewaredPostsRoute.DELETE("/:id", controllers.DestroyPost)
 			middlewaredPostsRoute.PATCH("/:id/publish", controllers.PublishPost)
+
+			// Votes
+			middlewaredPostsRoute.GET("/:id/votes/up", controllers.Upvote)
+			middlewaredPostsRoute.GET("/:id/votes/down", controllers.Downvote)
 		}
 
 		// Review
