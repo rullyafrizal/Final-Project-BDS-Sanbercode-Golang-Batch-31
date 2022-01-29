@@ -16,10 +16,12 @@ services:
     build:
       context: .
       dockerfile: ./db.Dockerfile
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+    # environment:
+    #   - POSTGRES_USER=${DB_USER}
+    #   - POSTGRES_PASSWORD=${DB_PASSWORD}
+    #   - POSTGRES_DB=${DB_NAME}
+    env_file:
+      - docker.env
     tty: true
     container_name: blog-api-db
     restart: always

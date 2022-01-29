@@ -17,7 +17,7 @@ type Post struct {
 	Tags        []Tag        `json:"tags,omitempty" gorm:"many2many:post_tags;"`
 	Reviews     []Review     `json:"reviews,omitempty"`
 	Votes       []User       `json:"votes,omitempty" gorm:"many2many:votes;"`
-	PublishedAt sql.NullTime `json:"published_at"`
+	PublishedAt sql.NullTime `json:"published_at" swaggertype:"string"`
 	CreatedAt   time.Time    `json:"-" gorm:"default:CURRENT_TIMESTAMP;autoCreateTime"`
 	UpdatedAt   time.Time    `json:"-" gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime"`
 }

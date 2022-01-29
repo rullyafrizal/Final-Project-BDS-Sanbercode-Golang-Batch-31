@@ -49,6 +49,12 @@ func (r *RegisterRequest) Validate() map[string]string {
 		errMsgs["name"] = "name is required"
 	}
 
+	if strings.TrimSpace(r.Name) != "" {
+		if len(r.Name) < 3 {
+			errMsgs["name"] = "name must be at least 3 characters"
+		}
+	}
+
 	return errMsgs
 }
 

@@ -5,6 +5,9 @@ import (
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/controllers"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/middlewares"
 	"gorm.io/gorm"
+
+	swaggerFiles "github.com/swaggo/files"     // swagger embed files
+	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 )
 
 func SetupRouter(db *gorm.DB) {
@@ -81,6 +84,9 @@ func SetupRouter(db *gorm.DB) {
 			middlewaredReviewsRoute.PUT("/:id/reviews/:review_id", controllers.UpdateReview)
 			middlewaredReviewsRoute.DELETE("/:id/reviews/:review_id", controllers.DestroyReview)
 		}
+
+		// Swagger
+		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	}
 

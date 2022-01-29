@@ -45,5 +45,41 @@ func (r *StoreUserRequest) Validate() map[string]string {
 		errMsgs["name"] = "name is required"
 	}
 
+	if strings.TrimSpace(r.Name) != "" {
+		if len(r.Name) < 3 {
+			errMsgs["name"] = "name must be at least 3 characters"
+		}
+	}
+
+	return errMsgs
+}
+
+type UpdateUserRequest struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Avatar   string `json:"avatar"`
+}
+
+func (u *UpdateUserRequest) Validate() map[string]string {
+	var errMsgs map[string]string = map[string]string{}
+
+	if strings.TrimSpace(u.Email) != "" {
+		if !utils.IsValidEmail(u.Email) {
+			errMsgs["email"] = "invalid email"
+		}
+	}
+
+	if strings.TrimSpace(u.Avatar) != "" {
+		if !utils.IsValidUrl(u.Avatar) {
+			errMsgs["avatar"] = "invalid avatar url"
+		}
+	}
+
+	if strings.TrimSpace(u.Name) != "" {
+		if len(u.Name) < 3 {
+			errMsgs["name"] = "name must be at least 3 characters"
+		}
+	}
+
 	return errMsgs
 }
