@@ -333,6 +333,11 @@ paths:
   /api/v1/posts:
     get:
       description: Get a list of published posts.
+      parameters:
+      - description: search query
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
@@ -779,6 +784,10 @@ paths:
         in: header
         name: Authorization
         required: true
+        type: string
+      - description: search query
+        in: query
+        name: search
         type: string
       produces:
       - application/json
