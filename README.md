@@ -6,7 +6,7 @@
 - Postgresql 9.6.x
 
 ## Database Schema
-- [Database Schema](/erd.png)
+- ![Database Schema](/erd.png)
 
 ## Endpoint Documentation
 - https://blog-api-fp.herokuapp.com/api/v1/swagger/index.html
