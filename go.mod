@@ -1,6 +1,6 @@
 module github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31
 
-// +heroku goVersion go1.17.5
+// +heroku goVersion go1.17
 go 1.17
 
 require (
