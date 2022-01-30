@@ -2,13 +2,12 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/config"
-	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/docs"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/routes"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/seeds"
+	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/utils"
 )
 
 // @contact.name API Support
@@ -23,7 +22,7 @@ import (
 var err error
 
 func main() {
-	if os.Getenv("APP_ENV") == "local" {
+	if utils.Getenv("APP_ENV", "local") == "local" {
 		err = godotenv.Load()
 		if err != nil {
 			log.Fatal("Error loading .env file")
@@ -31,17 +30,7 @@ func main() {
 	}
 
 	//programmatically set swagger info
-	swaggerHost := os.Getenv("SWAGGER_HOST")
-
-	if swaggerHost == "" {
-		swaggerHost = "localhost:8080"
-	}
-
-	docs.SwaggerInfo.Title = "Swagger Blog API"
-	docs.SwaggerInfo.Description = "This is a Blog Rest API Docs."
-	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = swaggerHost
-	docs.SwaggerInfo.Schemes = []string{"http", "https"}
+	config.SetupSwagger()
 
 	db := config.ConnectPostgres()
 	sqlDb, err := db.DB()
