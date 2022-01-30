@@ -1,1 +1,1 @@
-web: fp-go-b31
+web: bin/Final-Project-BDS-Sanbercode-Golang-Batch-31
