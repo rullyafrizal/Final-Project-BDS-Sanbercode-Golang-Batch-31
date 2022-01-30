@@ -16,6 +16,7 @@ import (
 // @Description Get a list of published posts.
 // @Tags Posts
 // @Produce json
+// @Param search query string false "search query"
 // @Success 200 {object} results.JSONResult{data=[]models.Post}
 // @Failure 500 {object} results.JSONResult{data=string}
 // @Router /api/v1/posts [get]
@@ -184,6 +185,7 @@ func DestroyPost(c *gin.Context) {
 // @Tags Posts
 // @Produce json
 // @Param Authorization header string true "Bearer token"
+// @Param search query string false "search query"
 // @Success 200 {object} results.JSONResult{data=[]models.Post}
 // @Failure 500 {object} results.JSONResult{data=string}
 // @Router /api/v1/posts/my [get]
