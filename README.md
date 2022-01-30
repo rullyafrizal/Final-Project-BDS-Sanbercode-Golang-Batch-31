@@ -30,3 +30,9 @@
 - Run `docker compose build`
 - Run `docker compose up -d`
 - Ready to rock and roll
+
+#### Basic Admin Credentials
+```
+email : admin@admin.com
+password : Admin123
+```
