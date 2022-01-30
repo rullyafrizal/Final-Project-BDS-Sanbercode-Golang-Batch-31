@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/config"
@@ -22,10 +23,11 @@ import (
 var err error
 
 func main() {
-	err = godotenv.Load()
-
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if os.Getenv("APP_ENV") == "local" {
+		err = godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	//programmatically set swagger info
