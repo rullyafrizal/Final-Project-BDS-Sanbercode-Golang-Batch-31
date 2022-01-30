@@ -31,10 +31,16 @@ func main() {
 	}
 
 	//programmatically set swagger info
+	swaggerHost := os.Getenv("SWAGGER_HOST")
+
+	if swaggerHost == "" {
+		swaggerHost = "localhost:8080"
+	}
+
 	docs.SwaggerInfo.Title = "Swagger Blog API"
 	docs.SwaggerInfo.Description = "This is a Blog Rest API Docs."
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.Host = swaggerHost
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	db := config.ConnectPostgres()
