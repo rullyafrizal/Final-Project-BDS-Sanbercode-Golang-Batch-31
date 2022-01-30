@@ -16,6 +16,7 @@ type DbConfig struct {
 	User     string
 	Password string
 	Dbname   string
+	SslMode  string
 }
 
 func BuildDBConfig() *DbConfig {
@@ -25,11 +26,12 @@ func BuildDBConfig() *DbConfig {
 		User:     os.Getenv("DB_USER"),
 		Password: os.Getenv("DB_PASSWORD"),
 		Dbname:   os.Getenv("DB_NAME"),
+		SslMode:  os.Getenv("DB_SSL_MODE"),
 	}
 }
 
 func DbUrl(dbConfig *DbConfig) string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=allow", dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Dbname)
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Dbname, dbConfig.SslMode)
 }
 
 func ConnectPostgres() *gorm.DB {
