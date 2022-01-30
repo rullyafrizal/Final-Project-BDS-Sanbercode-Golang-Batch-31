@@ -29,7 +29,7 @@ func BuildDBConfig() *DbConfig {
 }
 
 func DbUrl(dbConfig *DbConfig) string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Dbname)
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=allow", dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Dbname)
 }
 
 func ConnectPostgres() *gorm.DB {
