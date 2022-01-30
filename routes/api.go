@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/controllers"
 	"github.com/rullyafrizal/Final-Project-BDS-Sanbercode-Golang-Batch-31/middlewares"
@@ -90,5 +92,10 @@ func SetupRouter(db *gorm.DB) {
 
 	}
 
-	r.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	r.Run(":" + port)
 }
