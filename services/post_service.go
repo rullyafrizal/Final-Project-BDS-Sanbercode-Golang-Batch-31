@@ -17,7 +17,7 @@ func GetPosts(c *gin.Context, posts *[]models.Post) error {
 	q := db.Preload("PostImages").Preload("Tags").Where("published_at IS NOT NULL")
 
 	if c.Query("search") != "" {
-		q = q.Where("title LIKE ?", "%"+c.Query("search")+"%").Where("content LIKE ?", "%"+c.Query("search")+"%")
+		q = q.Where("title LIKE ?", "%"+c.Query("search")+"%")
 	}
 
 	err := q.Find(&posts).Error
@@ -43,7 +43,7 @@ func GetMyPosts(c *gin.Context, posts *[]models.Post) error {
 	q := db.Preload("PostImages").Preload("Tags").Where("user_id = ?", authId)
 
 	if c.Query("search") != "" {
-		q = q.Where("title LIKE ?", "%"+c.Query("search")+"%").Where("content LIKE ?", "%"+c.Query("search")+"%")
+		q = q.Where("title LIKE ?", "%"+c.Query("search")+"%")
 	}
 
 	err = q.Find(&posts).Error
