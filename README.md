@@ -24,7 +24,7 @@
   DB_HOST=blog-api-db
   DB_PORT=5432
   DB_USER=blog
-  DB_PASS=secret
+  DB_PASSWORD=secret
   DB_NAME=blog_api
   ```
 - Run `docker compose build`

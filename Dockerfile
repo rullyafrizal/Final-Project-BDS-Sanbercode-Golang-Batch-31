@@ -1,4 +1,4 @@
-FROM golang:alpine
+FROM golang:alpine AS builder
 RUN mkdir /blog-api-docker
 
 WORKDIR /blog-api-docker
@@ -18,3 +18,11 @@ ADD https://raw.githubusercontent.com/eficode/wait-for/v2.1.0/wait-for /usr/loca
 RUN chmod +rx /usr/local/bin/wait-for /entry.sh
 
 ENTRYPOINT ["sh", "/entry.sh"]
+
+# Run stage
+FROM alpine:latest
+WORKDIR /blog-api-docker
+
+COPY --from=builder /blog-api-docker/main .
+
+CMD ["/blog-api-docker/main"]
